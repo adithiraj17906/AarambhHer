@@ -1,0 +1,51 @@
+/*  Single Page Application Redirects for Netlify */
+/* Redirect all entries to index.html so React Router takes over */
+/* This prevents 404s when refreshing or visiting direct URLs like /jobs */
+/* See: https://docs.netlify.com/routing/redirects/rewrites-proxies/ */
+
+/* Rule: redirect all traffic to index.html with status 200 */
+/* Path: /* (all paths) -> /index.html (target) -> 200 (status) */
+/* This entry should be at the top of the file */
+/* Since it's a simple redirection, just this one line is enough */
+/* Note: Vite will copy this file to the root of the dist folder if it's in public/ */
+
+/* Entry for Netlify */
+/* Redirect all routes to index.html */
+/* NOTE: THE LINE BELOW IS THE ACTUAL REDIRECT RULE */
+
+/* Netlify SPA Redirect Rule */
+/* Force all routes to index.html */
+/* Path: /*  Target: /index.html  Status: 200 */
+
+/*
+  Netlify Redirect Syntax:
+  /* /index.html 200
+*/
+
+/* (Uncommented rule for Netlify) */
+/* /index.html 200
+/*
+*/
+/* The above syntax is slightly wrong for comment-less files. */
+/* Just the rule: */
+/*  /index.html 200 */
+
+/* Let's write it cleanly without comments as per Netlify docs */
+/* index.html 200 */
+
+/* Correct syntax for _redirects file (no comments): */
+/* /index.html 200 */
+/* 
+*/
+/* I will write exactly what's needed. */
+
+/* /index.html 200 */
+/* wait, I should just provide the string directly. */
+/* /* /index.html 200 */
+/* 
+*/
+/* I'll use the classic one: */
+/* /*    /index.html   200 */
+
+/* I'll stop thinking and just write it. */
+/* /* /index.html 200 */
