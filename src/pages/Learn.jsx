@@ -1,11 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import VideoCard from '../components/VideoCard';
 import { videoData } from '../data/mockData';
+import { api } from '../services/api';
 
 export default function Learn({ toast }) {
+  const [videos, setVideos] = useState(videoData);
   const [topic, setTopic] = useState("All Topics");
   const topics = ["All Topics","Tech Skills","Business","Design","Healthcare","Soft Skills","Finance","Stitching","Cooking","Vocational"];
-  const filtered = topic === "All Topics" ? videoData : videoData.filter(v => v.cat === topic);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getVideos()
+      .then(data => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setVideos(data);
+        }
+      })
+      .catch(err => {
+        console.warn("Backend not reached for videos, using local data:", err);
+      });
+    return () => { isMounted = false; };
+  }, []);
+
+  const filtered = topic === "All Topics" ? videos : videos.filter(v => v.cat === topic);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 fade-in">

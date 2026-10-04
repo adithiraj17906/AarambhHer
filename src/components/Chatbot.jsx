@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { aiReplies } from '../data/mockData';
+import { api } from '../services/api';
 
 // Multilingual Dictionary
 const translations = {
@@ -105,7 +106,7 @@ export default function Chatbot() {
     window.speechSynthesis.speak(utterance);
   };
 
-  const send = (text) => {
+  const send = async (text) => {
     const msg = (text || input).trim();
     if (!msg) return;
     
@@ -118,29 +119,42 @@ export default function Chatbot() {
     setInput("");
     setTyping(true);
     
-    setTimeout(() => {
-      setTyping(false);
-      
-      // Look up reply in current language dict, fallback to default English, then a generic message
-      let reply = "";
-      if (t.replies && t.replies[msg]) {
-         reply = t.replies[msg];
-      } else if (aiReplies[msg]) {
-         reply = aiReplies[msg];
-      } else {
-         reply = language === 'hi' 
-           ? "बढ़िया सवाल! क्या आप मुझे अपनी शैक्षिक पृष्ठभूमि के बारे में और बता सकते हैं?" 
-           : language === 'te' 
-             ? "మంచి ప్రశ్న! దయచేసి మీ విద్యా నేపథ్యం గురించి కొంచెం చెప్పగలరా?" 
-             : "Great question! Could you tell me more about your educational background and what kind of work environment you prefer — remote, field, or office?";
+    try {
+      // If language has a specific localized canned response, use it
+      if (t.replies && t.replies[msg] && language !== 'en') {
+        const reply = t.replies[msg];
+        setTyping(false);
+        setMessages(m => [...m, { from:"bot", text:reply }]);
+        speakText(reply, language);
+        return;
       }
 
+      // Query backend advisor API
+      const res = await api.chatWithAdvisor(msg);
+      const reply = res?.reply || (t.replies && t.replies[msg]) || aiReplies[msg] || (
+        language === 'hi' 
+          ? "बढ़िया सवाल! क्या आप मुझे अपनी शैक्षिक पृष्ठभूमि के बारे में और बता सकते हैं?" 
+          : language === 'te' 
+            ? "మంచి ప్రశ్న! దయచేసి మీ విద్యా నేపథ్యం గురించి కొంచెం చెప్పగలరా?" 
+            : "Great question! Could you tell me more about your educational background and what kind of work environment you prefer — remote, field, or office?"
+      );
+
+      setTyping(false);
       setMessages(m => [...m, { from:"bot", text:reply }]);
-      
-      // Auto-read bot response
       speakText(reply, language);
-      
-    }, 1500);
+    } catch (err) {
+      console.warn("Backend chat failed, falling back to local responses:", err);
+      let reply = (t.replies && t.replies[msg]) || aiReplies[msg] || (
+        language === 'hi' 
+          ? "बढ़िया सवाल! क्या आप मुझे अपनी शैक्षिक पृष्ठभूमि के बारे में और बता सकते हैं?" 
+          : language === 'te' 
+            ? "మంచి ప్రశ్న! దయచేసి మీ విద్యా నేపథ్యం గురించి కొంచెం చెప్పగలరా?" 
+            : "Great question! Could you tell me more about your educational background and what kind of work environment you prefer — remote, field, or office?"
+      );
+      setTyping(false);
+      setMessages(m => [...m, { from:"bot", text:reply }]);
+      speakText(reply, language);
+    }
   };
 
   // Web Speech API for Input

@@ -1,52 +1,90 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import JobCard from '../components/JobCard';
 import GigCard from '../components/GigCard';
 import { jobData, gigData } from '../data/mockData';
+import { api } from '../services/api';
 
 export default function Jobs({ user, toast }) {
   const navigate = useNavigate();
+  const [jobs, setJobs] = useState(jobData);
+  const [gigs, setGigs] = useState(gigData);
+  const [loading, setLoading] = useState(true);
   const [activeType, setActiveType] = useState("All");
   const [activeLoc, setActiveLoc]   = useState("All");
   const [activeExp, setActiveExp]   = useState("Any");
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([api.getJobs(), api.getGigs()])
+      .then(([jobsRes, gigsRes]) => {
+        if (isMounted) {
+          if (Array.isArray(jobsRes) && jobsRes.length > 0) {
+            setJobs(jobsRes);
+          }
+          if (Array.isArray(gigsRes) && gigsRes.length > 0) {
+            setGigs(gigsRes);
+          }
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.warn("Backend not reachable, falling back to local data:", err);
+        if (isMounted) setLoading(false);
+      });
+
+    return () => { isMounted = false; };
+  }, []);
 
   const filterItem = (item, isGig) => {
     // Type Filter
     if (activeType !== "All") {
       if (activeType === "Gig Work" && !isGig) return false;
       if (activeType !== "Gig Work" && isGig) return false;
-      if (activeType === "Remote" && !item.location.includes("Remote") && !item.tags.includes("Remote")) return false;
+      if (activeType === "Remote" && !item.location?.includes("Remote") && !item.tags?.includes("Remote")) return false;
       if (activeType !== "Remote" && activeType !== "Gig Work" && item.type !== activeType) return false;
     }
 
     // Location Filter
     if (activeLoc !== "All") {
-      if (!item.location.includes(activeLoc)) return false;
+      if (!item.location?.includes(activeLoc)) return false;
     }
 
     // Experience Filter (Jobs only usually, but let's check tags)
     if (activeExp !== "Any" && !isGig) {
-      if (activeExp === "Fresher" && !item.tags.includes("Freshers OK") && !item.tags.includes("Beginner OK")) return false;
-      if (activeExp === "1-3 yrs" && !item.tags.includes("1-3 yrs")) {
+      if (activeExp === "Fresher" && !item.tags?.includes("Freshers OK") && !item.tags?.includes("Beginner OK")) return false;
+      if (activeExp === "1-3 yrs" && !item.tags?.includes("1-3 yrs")) {
         // Simple logic for mock data: if it's not fresher and not 3+, assume 1-3
-        if (item.tags.includes("Freshers OK") || item.tags.includes("3+ yrs")) return false;
+        if (item.tags?.includes("Freshers OK") || item.tags?.includes("3+ yrs")) return false;
       }
-      if (activeExp === "3+ yrs" && !item.tags.includes("3+ yrs")) return false;
+      if (activeExp === "3+ yrs" && !item.tags?.includes("3+ yrs")) return false;
     }
 
     return true;
   };
 
-  const filteredJobs = jobData.filter(j => filterItem(j, false));
-  const filteredGigs = gigData.filter(g => filterItem(g, true));
+  const filteredJobs = jobs.filter(j => filterItem(j, false));
+  const filteredGigs = gigs.filter(g => filterItem(g, true));
 
-  const onApply = (title) => {
+  const onApply = async (job) => {
     if (!user) {
       toast("Please login to apply for this job.");
       navigate("/login");
       return;
     }
-    toast(`Applied for: ${title}! We'll notify you soon. ✓`);
+
+    const jobTitle = typeof job === 'string' ? job : job.title;
+    const jobId = typeof job === 'object' ? job.id : null;
+
+    if (jobId) {
+      try {
+        await api.applyForJob(jobId, { applicantName: user.name || 'User', email: user.email });
+        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, appliedRecent: (j.appliedRecent || 0) + 1 } : j));
+      } catch (err) {
+        console.warn("Error updating application on backend:", err);
+      }
+    }
+    toast(`Applied for: ${jobTitle}! We'll notify you soon. ✓`);
   };
 
   const onAccept = (title) => {

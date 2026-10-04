@@ -39,10 +39,24 @@ export default function JobCard({ job, onApply }) {
             <span key={ti} className={`text-xs font-medium px-2.5 py-1 rounded-full ${job.tColors[ti]}`}>{tag}</span>
           ))}
         </div>
+
+        {job.reviews && job.reviews.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-pink-50">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Reviews Written by Women</p>
+            <div className="flex flex-col gap-2">
+              {job.reviews.map((rev, ri) => (
+                <div key={ri} className="flex gap-2 items-start">
+                  <span className="text-pink-400 text-lg leading-none font-serif">"</span>
+                  <p className="text-xs text-gray-600 italic leading-relaxed">{rev}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <div className="flex flex-col justify-end flex-shrink-0">
         <button
-          onClick={(e) => { e.stopPropagation(); onApply(job.title); }}
+          onClick={(e) => { e.stopPropagation(); onApply(job); }}
           className="bg-pink-700 hover:bg-pink-800 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-all border-0 cursor-pointer shadow-lg shadow-pink-900/20 active:scale-95">
           Apply Now
         </button>

@@ -44,17 +44,17 @@ AarambhHEr aims to address these challenges through technology-driven solutions.
 
 ## 🚀 Features
 
-### 📍 Location-Based Job Finder
-Helps users find nearby job opportunities based on their location, skills, and preferences.
+### 📍 Location-Based Job & Gig Finder
+Helps users find nearby job opportunities and flexible shifts based on their location, skills, and preferences.
 
 ### 🤖 AI Career Advisor
-An AI chatbot that provides personalized career guidance and skill recommendations.
+An AI chatbot that provides personalized career guidance, skill roadmaps, and multilingual responses (English, Hindi, Telugu).
 
 ### 📄 AI Resume Analyzer
 Allows users to upload resumes and receive AI-powered feedback to improve employability.
 
 ### 🎓 Learning Hub
-Provides curated YouTube learning resources to help users develop relevant skills.
+Provides curated video learning resources to help users develop relevant skills across Tech, Business, Design, Finance, and Vocational domains.
 
 ### 🛡 Safety Center
 A dedicated section where women can report unsafe workplaces and access emergency helplines.
@@ -63,28 +63,36 @@ A dedicated section where women can report unsafe workplaces and access emergenc
 
 ## 🛠 Tech Stack
 
-Frontend  
-- React  
-- CSS  
+### Frontend  
+- React 19  
+- Tailwind CSS v4  
+- React Router v7  
+- Vite 8  
 
-Backend (Planned)  
-- Node.js / Django  
-
-AI Integration  
-- AI APIs for chatbot and resume analysis  
-
-Other Tools  
-- YouTube API  
-- Maps API for location-based jobs  
+### Backend  
+- Node.js & Express  
+- PostgreSQL (with automatic schema creation & seed data)  
+- CORS & Dotenv  
+- RESTful CRUD APIs for Jobs, Gigs, Courses, and Advisor FAQ  
 
 ---
 
-## 🌟 Impact
+## 🏃‍♂️ Running the Project Locally
 
-AarambhHEr empowers women by providing access to jobs, skills, and career guidance while promoting safe and inclusive workplaces.
+### 1. Start Backend Server
+```bash
+cd server
+npm install
+npm run dev
+```
+Backend runs on `http://localhost:5000`.
 
-
-
+### 2. Start Frontend App
+```bash
+npm install
+npm run dev
+```
+Frontend runs on `http://localhost:5173`.
 
 ---
 
